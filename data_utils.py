@@ -86,7 +86,7 @@ def get_data(data, target, dataset='eq', seed=None, shape=None):
     x = data  # [:, 300:300 + k]  # [220??, 4096]  4096=64*64
     # 0: 爆炸 blast
     # 1: noise 噪声
-    # 5: nature 自然地震
+    # 5: nature 自然地震 -> 2
     y = np.argmax(target, axis=1)
 
     if dataset == 'eq2' or dataset == 'ne':
