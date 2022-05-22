@@ -4,6 +4,9 @@
 
 pip install -r requirements.txt
 
+# 数据划分
+
+训练:验证:测试   0.63:0.07:0.3
 
 # 2D shape data
 
