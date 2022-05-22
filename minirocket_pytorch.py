@@ -6,8 +6,8 @@ from tsai.models.MINIROCKET_Pytorch import *
 from tsai.models.utils import *
 
 from scipy.io import loadmat
-from sklearn import preprocessing
 from data_utils import get_data
+from matplotlib import pyplot as plt
 
 
 if __name__ == '__main__':
@@ -44,12 +44,13 @@ if __name__ == '__main__':
         timer.stop()
 
         new_feat = get_minirocket_features(X[splits[1]], mrf, chunksize=1024, to_np=True)
-        probas, _, preds = learn.get_X_preds(new_feat)
-        print('Valid Accuracy', sklearn.metrics.accuracy_score(y[splits[1]], preds.astype(int)))
+        probas, _, pred = learn.get_X_preds(new_feat)
+        print('Valid Accuracy', sklearn.metrics.accuracy_score(y[splits[1]], pred.astype(int)))
 
         new_feat = get_minirocket_features(x_test, mrf, chunksize=1024, to_np=True)
-        probas, _, preds = learn.get_X_preds(new_feat)
-        print('Test accuracy', sklearn.metrics.accuracy_score(y_test, preds.astype(int)))
+        probas, _, pred = learn.get_X_preds(new_feat)
+        pred = pred.astype(int)
+        print('Test accuracy', sklearn.metrics.accuracy_score(y_test, pred))
 
         PATH = Path("./models/MR_feature.pt")
         PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -64,5 +65,17 @@ if __name__ == '__main__':
         PATH = Path('./models/MR_learner.pkl')
         learn = load_learner(PATH, cpu=False)
         new_feat = get_minirocket_features(x_test, mrf, chunksize=1024, to_np=True)
-        probas, _, preds = learn.get_X_preds(new_feat)
-        print('Test accuracy', sklearn.metrics.accuracy_score(y_test, preds.astype(int)))
+        probas, _, pred = learn.get_X_preds(new_feat)
+        pred = pred.astype(int)
+        print('Test accuracy', sklearn.metrics.accuracy_score(y_test, pred))
+
+    from sklearn.metrics import precision_recall_fscore_support
+    print('precision recall  F1 score in micro:', precision_recall_fscore_support(y_test, pred, average='micro'))
+    print('precision recall  F1 score in macro:', precision_recall_fscore_support(y_test, pred, average='macro'))
+
+    from sklearn.metrics import confusion_matrix,  ConfusionMatrixDisplay
+    cm = confusion_matrix(y_test, pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2])
+    disp.plot()
+    plt.savefig('resnet_confusion_matrix.png')
+    plt.close()
