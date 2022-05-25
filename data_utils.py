@@ -15,75 +15,15 @@ def normalization(array):
     return normalizer_data
 
 
-def data_clean_and_norm(data, target, args):
-    x = data[:, 300:1836]  # [11086, 1536]
-    yy = target[:, :]
-    y = []
-    # 0: 爆炸 blast
-    # 1: noise 噪声
-    # 5: nature 自然地震
-    for i in range(len(x)):
-        j = len(yy[i]) - 1
-        while j >= 0:
-            if yy[i][j] == 1:
-                # print('在{} {}的处找到key值'.format(i, j))
-                y.append(j)
-                break
-            j -= 1
-        else:
-            print('没找到')
-
-    y = np.array(y)
-    if args.dataset == 'eq2' or args.dataset == 'ne':
-        # eq2 -> only consider  noise 1 and nature earth 5
-        ys = y
-        # remove 0 blast
-        index = y != 0
-        x = x[index]
-        y = ys[index]
-        # treat nature 5 as category 0
-        y[y == 5] = 0
-    elif args.dataset == 'nb':
-        # eq2 -> only consider  noise 1 and blast 0
-        ys = y
-        # remove 0 blast
-        index = y != 5
-        x = x[index]
-        y = ys[index]
-    elif args.dataset == 'eb':
-        # eq2 -> only consider  blast 0 and nature earth 5
-        ys = y
-        # remove 0 blast
-        index = y != 1
-        x = x[index]
-        y = ys[index]
-        # treat nature 5 as category 1
-        y[y == 5] = 1
-    else:
-        y[y == 5] = 2
-
-    norm_x = normalization(x)
-
-    tensor_x = torch.Tensor(norm_x)  # transform to torch tensor
-    tensor_y = torch.Tensor(y)
-    tensor_i = torch.arange(len(y))
-    my_dataset = TensorDataset(tensor_x, tensor_y, tensor_i)  # create your dataset
-
-    x_train, x_test, y_train, y_test = train_test_split(norm_x, y, test_size=0.1, random_state=args.seed)
-    train_i = torch.arange(len(y_train))
-    train_set = TensorDataset(torch.Tensor(x_train), torch.Tensor(y_train), train_i)  # create your dataset
-    test_i = torch.arange(len(y_test))
-    test_set = TensorDataset(torch.Tensor(x_test), torch.Tensor(y_test), test_i)  # create your dataset
-    return my_dataset, train_set, test_set
-
-
-def get_data(data, target, dataset='eq', seed=None, shape=None):
+def get_data(data, target, dataset='eq', seed=None, select=None, shape=None):
     if seed is None:
         seed = np.random.randint(100000)
     k = 2000
     if shape is None:
         shape = (-1, 3, k)
     x = data  # [:, 300:300 + k]  # [220??, 4096]  4096=64*64
+    if select is not None:
+        x = data[:]
     # 0: 爆炸 blast
     # 1: noise 噪声
     # 5: nature 自然地震 -> 2
@@ -107,7 +47,7 @@ def get_data(data, target, dataset='eq', seed=None, shape=None):
         y[y == 5] = 2
 
     norm_x = normalization(x).reshape(shape).astype('float32')
-    sss = ShuffleSplit(n_splits=1, test_size=0.3, random_state=seed)
+    sss = ShuffleSplit(n_splits=1, test_size=0.9, random_state=seed)
     sss.get_n_splits(norm_x, y)
     splits_test = next(sss.split(norm_x, y))
 
@@ -117,7 +57,7 @@ def get_data(data, target, dataset='eq', seed=None, shape=None):
     # x_train, x_test, y_train, y_test = train_test_split(norm_x, y, test_size=0.3, random_state=seed)
 
     # training and validation sets
-    sss = ShuffleSplit(n_splits=1, test_size=0.1, random_state=seed)
+    sss = ShuffleSplit(n_splits=1, test_size=0.95, random_state=seed)
     sss.get_n_splits(x_train, y_train)
     splits = next(sss.split(x_train, y_train))
     train_index, valid_index = splits
@@ -128,23 +68,23 @@ def get_data(data, target, dataset='eq', seed=None, shape=None):
     return x_train, x_valid, x_test, y_train, y_valid, y_test, splits2, splits_test
 
 
-def get_data2(args):
-    train_data = loadmat('earthb.mat')
-    all_data = train_data['images']
-    all_target = train_data['labels']
+def get_data_loader(data, target, args, shape=None):
 
-    dataset, train_set, test_set = data_clean_and_norm(all_data, all_target, args)
-    return dataset, train_set, test_set
+    x_train, x_valid, x_test, y_train, y_valid, y_test, splits2, splits_test = get_data(data, target, dataset=args.dataset, seed=args.seed, select=None, shape=shape)
+    # set contains training and validation
+    X = np.concatenate([x_train, x_valid])
+    y = np.concatenate([y_train, y_valid])
 
+    tensor_x = torch.Tensor(X)  # transform to torch tensor
+    tensor_y = torch.Tensor(y)
+    tensor_i = torch.arange(len(y))
+    my_dataset = TensorDataset(tensor_x, tensor_y, tensor_i)  # create your dataset
 
-def get_unlabeled_data(args):
-    train_data = loadmat('strong_data.mat')
-    all_data = train_data['out']
-    norm_x = normalization(all_data)
-    tensor_x = torch.Tensor(norm_x)  # transform to torch tensor
-    tensor_i = torch.arange(len(norm_x))
-    my_dataset = TensorDataset(tensor_x, tensor_i)  # create your dataset
-    return my_dataset
+    train_i = torch.arange(len(y_train))
+    train_set = TensorDataset(torch.Tensor(x_train), torch.Tensor(y_train), train_i)  # create your dataset
+    test_i = torch.arange(len(y_test))
+    test_set = TensorDataset(torch.Tensor(x_test), torch.Tensor(y_test), test_i)  # create your dataset
+    return my_dataset, train_set, test_set
 
 
 def random_uniform_data(data_loader, args):
