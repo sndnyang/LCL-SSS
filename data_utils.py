@@ -25,8 +25,8 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None):
     if select is not None:
         x = data[:]
     # 0: 爆炸 blast
-    # 1: noise 噪声
-    # 5: nature 自然地震 -> 2
+    # 1: 地震 earthquake
+    # 5: noise 噪声 -> 2
     y = np.argmax(target, axis=1)
 
     if dataset == 'eq2' or dataset == 'ne':
