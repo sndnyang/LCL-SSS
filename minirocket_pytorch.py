@@ -1,3 +1,5 @@
+import time
+import datetime
 from tsai.basics import *
 import sktime
 import sklearn
@@ -17,6 +19,7 @@ if __name__ == '__main__':
 
     # load data
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits, splits_test = get_data(all_data, all_target, dataset='eq', seed=1)
+    print(x_train.shape, x_valid.shape, x_test.shape)
     # set contains training and validation
     X = np.concatenate([x_train, x_valid])
     y = np.concatenate([y_train, y_valid])
@@ -26,6 +29,7 @@ if __name__ == '__main__':
         training = False
     print("train or evaluate? ", 'Train!' if training is True else 'Evaluate!')
     if training is True:
+        start = time.time()
         mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2]).to(default_device())
         mrf.fit(x_train)
 
@@ -38,11 +42,12 @@ if __name__ == '__main__':
 
         model = build_ts_model(MiniRocketHead, dls=dls)
         learn = Learner(dls, model, metrics=accuracy)
-
+        epoch = 30
         timer.start()
-        learn.fit_one_cycle(30, 3e-4)    # epoch 30 (20 ~ 100),  learning rate 3e-4
+        learn.fit_one_cycle(epoch, 3e-4)    # epoch 30 (20 ~ 100),  learning rate 3e-4
         timer.stop()
 
+        end = time.time()
         new_feat = get_minirocket_features(X[splits[1]], mrf, chunksize=1024, to_np=True)
         probas, _, pred = learn.get_X_preds(new_feat)
         print('Valid Accuracy', sklearn.metrics.accuracy_score(y[splits[1]], pred.astype(int)))
@@ -52,6 +57,8 @@ if __name__ == '__main__':
         pred = pred.astype(int)
         print('Test accuracy', sklearn.metrics.accuracy_score(y_test, pred))
 
+        print("Datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
+        print("Total time(feature init + %d epochs training) takes %d seconds, " % (epoch, end - start), str(datetime.timedelta(seconds=end-start)))
         PATH = Path("./models/MR_feature.pt")
         PATH.parent.mkdir(parents=True, exist_ok=True)
         torch.save(mrf.state_dict(), PATH)
