@@ -10,6 +10,7 @@ from tsai.models.utils import *
 from scipy.io import loadmat
 from data_utils import get_data
 from matplotlib import pyplot as plt
+from loguru import logger
 
 
 if __name__ == '__main__':
@@ -22,6 +23,9 @@ if __name__ == '__main__':
     # set contains training and validation
     X = np.concatenate([x_train, x_valid])
     y = np.concatenate([y_train, y_valid])
+
+    logger.add('kmeans_0.log')
+    print = logger.info
 
     training = True
     if len(sys.argv) > 1:
@@ -45,5 +49,4 @@ if __name__ == '__main__':
     print('test accuracy')
     train_valid_acc = cluster_acc(y_test, y_pred)
     end = time.time()
-    print("Datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
-    print("total time (KMeans training + evaluate cluster accuracy) takes %d seconds, " % (end - start), str(datetime.timedelta(seconds=end-start)))
+    print("total time (KMeans training + evaluate cluster accuracy) takes %d seconds, %s" % (end - start, str(datetime.timedelta(seconds=end-start))))
