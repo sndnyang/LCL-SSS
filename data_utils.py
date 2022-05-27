@@ -47,7 +47,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None):
         y[y == 5] = 2
 
     norm_x = normalization(x).reshape(shape).astype('float32')
-    sss = ShuffleSplit(n_splits=1, test_size=0.9, random_state=seed)
+    sss = ShuffleSplit(n_splits=1, test_size=0.1, random_state=seed)
     sss.get_n_splits(norm_x, y)
     splits_test = next(sss.split(norm_x, y))
 
@@ -57,7 +57,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None):
     # x_train, x_test, y_train, y_test = train_test_split(norm_x, y, test_size=0.3, random_state=seed)
 
     # training and validation sets
-    sss = ShuffleSplit(n_splits=1, test_size=0.95, random_state=seed)
+    sss = ShuffleSplit(n_splits=1, test_size=0.1, random_state=seed)
     sss.get_n_splits(x_train, y_train)
     splits = next(sss.split(x_train, y_train))
     train_index, valid_index = splits

@@ -26,6 +26,7 @@ if __name__ == '__main__':
 
     # load data
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits, splits_test = get_data(all_data, all_target, dataset='eq', seed=1, shape=(-1, 3, 50, 40))
+    print(x_train.shape, x_valid.shape, x_test.shape)
     # set contains training and validation
     X = np.concatenate([x_train, x_valid])
     y = np.concatenate([y_train, y_valid])
@@ -42,45 +43,46 @@ if __name__ == '__main__':
                   metrics=['sparse_categorical_accuracy'])
 
     checkpoint_save_path = "./checkpoint/Baseline.ckpt"
-    if os.path.exists(checkpoint_save_path + '.index'):
+    if not training and os.path.exists(checkpoint_save_path + '.index'):
         print('-------------load the model-----------------')
         model.load_weights(checkpoint_save_path)
 
-    cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,
-                                                     save_weights_only=True,
-                                                     save_best_only=True)
+    else:
 
-    history = model.fit(x_train, y_train, batch_size=32, epochs=20, validation_data=(x_valid, y_valid), validation_freq=1,
-                        callbacks=[cp_callback])
+        cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,
+                                                         save_weights_only=True,
+                                                         save_best_only=True)
 
-    model.summary()
+        history = model.fit(x_train, y_train, batch_size=32, epochs=20, validation_data=(x_valid, y_valid), validation_freq=1,
+                            callbacks=[cp_callback])
 
-    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    train_log_dir = 'logs/gradient_/' + current_time + '/train'
-    test_log_dir = 'logs/gradient_/' + current_time + '/test'
+        model.summary()
 
-    #    show   ################
+        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        train_log_dir = 'logs/gradient_/' + current_time + '/train'
+        test_log_dir = 'logs/gradient_/' + current_time + '/test'
 
-    # 显示训练集和验证集的acc和loss曲线
-    acc = history.history['sparse_categorical_accuracy']
-    val_acc = history.history['val_sparse_categorical_accuracy']
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
+        #    show   ################
+        # 显示训练集和验证集的acc和loss曲线
+        acc = history.history['sparse_categorical_accuracy']
+        val_acc = history.history['val_sparse_categorical_accuracy']
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
 
-    plt.subplot(1, 2, 1)
-    plt.plot(acc, label='Training Accuracy')
-    plt.plot(val_acc, label='Validation Accuracy')
-    plt.title('Training and Validation Accuracy')
-    plt.legend()
+        plt.subplot(1, 2, 1)
+        plt.plot(acc, label='Training Accuracy')
+        plt.plot(val_acc, label='Validation Accuracy')
+        plt.title('Training and Validation Accuracy')
+        plt.legend()
 
-    plt.subplot(1, 2, 2)
-    plt.plot(loss, label='Training Loss')
-    plt.plot(val_loss, label='Validation Loss')
-    plt.title('Training and Validation Loss')
-    plt.legend()
-    # plt.show()
-    plt.savefig('loss_acc.png')
-    plt.close()
+        plt.subplot(1, 2, 2)
+        plt.plot(loss, label='Training Loss')
+        plt.plot(val_loss, label='Validation Loss')
+        plt.title('Training and Validation Loss')
+        plt.legend()
+        # plt.show()
+        plt.savefig('loss_acc.png')
+        plt.close()
 
     result = model.predict(x_test)
     pred = tf.argmax(result, axis=1)
