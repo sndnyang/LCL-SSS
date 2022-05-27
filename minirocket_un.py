@@ -31,16 +31,22 @@ if __name__ == '__main__':
     mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2]).to(default_device())
     mrf.fit(x_train)
 
-    X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True)
+    X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True).reshape(X.shape[0], -1)
     print(X_feat.shape)
 
     from sklearn.cluster import KMeans
-    y_pred = KMeans(n_clusters=3).fit_predict(X_feat.reshape(X.shape[0], -1))
+    model = KMeans(n_clusters=3)
+    y_pred = model.fit_predict(X_feat)
     print(y_pred[:10])
 
     from utils import cluster_acc
     train_valid_acc = cluster_acc(y, y_pred)
-    print('Test accuracy', train_valid_acc)
+    print('Valid accuracy', train_valid_acc)
+
+    X_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True).reshape(x_test.shape[0], -1)
+    y_pred = model.predict(X_feat)
+    train_valid_acc = cluster_acc(y_test, y_pred)
+    print('test accuracy', train_valid_acc)
     end = time.time()
     print("Datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
     print("total time(feature init + KMeans training + evaluate cluster accuracy) takes %d seconds, " % (end - start), str(datetime.timedelta(seconds=end-start)))
