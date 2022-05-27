@@ -3,13 +3,14 @@ import datetime
 from tsai.basics import *
 import sktime
 import sklearn
-
+from sklearn.cluster import KMeans
 from tsai.models.MINIROCKET_Pytorch import *
 from tsai.models.utils import *
 
 from scipy.io import loadmat
 from data_utils import get_data
 from matplotlib import pyplot as plt
+from utils import cluster_acc, plotter
 
 
 if __name__ == '__main__':
@@ -34,12 +35,10 @@ if __name__ == '__main__':
     X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True).reshape(X.shape[0], -1)
     print(X_feat.shape)
 
-    from sklearn.cluster import KMeans
     model = KMeans(n_clusters=3)
     y_pred = model.fit_predict(X_feat)
     print(y_pred[:10])
 
-    from utils import cluster_acc
     print('Valid accuracy')
     train_valid_acc = cluster_acc(y, y_pred)
 
@@ -50,6 +49,8 @@ if __name__ == '__main__':
     end = time.time()
     print("Datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
     print("total time(feature init + KMeans training + evaluate cluster accuracy) takes %d seconds, " % (end - start), str(datetime.timedelta(seconds=end-start)))
+
+
 
     PATH = Path("./models/MR_feature.pt")
     PATH.parent.mkdir(parents=True, exist_ok=True)

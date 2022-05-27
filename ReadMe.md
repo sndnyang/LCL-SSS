@@ -78,7 +78,7 @@ total time(feature init + 30 epochs training + evaluation) takes 62 seconds,  0:
 ## MiniRocket + KMeans
 
 ```
-python minirocket_un.py
+python minirocket_kmeans.py
 ```
 
 Valid (Train data)
@@ -102,6 +102,10 @@ Much slower, because sklearn KMeans uses multi-cores CPUs. So please use servers
 
 ## MiniRocket + Gaussian Mixture
 
+```
+python minirocket_gmm.py
+```
+
 Valid(Train data)
 
 - precision recall  F1 score in micro: (0.7281861791780111, 0.7281861791780111, 0.7281861791780111, None)
@@ -116,6 +120,48 @@ Test (unseen data)
 
 
 total time(feature init + GM training + evaluate cluster accuracy) takes 341 seconds,  0:05:41.382244
+
+
+## KMeans only
+
+```
+python kmeans.py
+```
+
+Valid 
+
+- precision recall  F1 score in micro: (0.41443018280824584, 0.41443018280824584, 0.41443018280824584, None)
+- precision recall  F1 score in macro: (0.36466642369961283, 0.35768726352641655, 0.3509105103790023, None)
+- precision recall  F1 score in weighted: (0.39853839805663566, 0.41443018280824584, 0.3952050271484101, None)
+
+Test
+
+- precision recall  F1 score in micro: (0.40955837870538414, 0.40955837870538414, 0.4095583787053841, None)
+- precision recall  F1 score in macro: (0.3614725644567485, 0.3519464691407293, 0.34555335489579786, None)
+- precision recall  F1 score in weighted: (0.3934958204550063, 0.40955837870538414, 0.3894361854535951, None)
+
+
+total time(KMeans training + evaluate cluster accuracy) takes 43 seconds,  0:00:43.213827
+
+## Gaussian Mixture only
+
+Valid
+
+- precision recall  F1 score in micro: (0.6155840788279529, 0.6155840788279529, 0.6155840788279529, None)
+- precision recall  F1 score in macro: (0.5325245187452413, 0.5746818320085421, 0.5426358216476126, None)
+- precision recall  F1 score in weighted: (0.5645584996493351, 0.6155840788279529, 0.5809346168689176, None)
+
+Test
+
+- precision recall  F1 score in micro: (0.7265577737447066, 0.7265577737447066, 0.7265577737447066, None)
+- precision recall  F1 score in macro: (0.5178998258431012, 0.6411639141669475, 0.5700647733106167, None)
+- precision recall  F1 score in weighted: (0.5717435580617377, 0.7265577737447066, 0.6366422396828016, None)
+
+total time(GM training + evaluate cluster accuracy) takes 526 seconds,  0:08:46
+
+```
+python gmm.py
+```
 
 # Observations
 
