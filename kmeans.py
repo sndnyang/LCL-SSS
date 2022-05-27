@@ -27,10 +27,6 @@ if __name__ == '__main__':
     logger.add('kmeans_0.log')
     print = logger.info
 
-    training = True
-    if len(sys.argv) > 1:
-        training = False
-    print("train or evaluate? ", 'Train!' if training is True else 'Evaluate!')
     start = time.time()
     X_feat = X.reshape(X.shape[0], -1)
     print(X_feat.shape)
