@@ -72,11 +72,13 @@ class ResNet18(Model):
         self.p1 = tf.keras.layers.GlobalAveragePooling2D()
         self.f1 = tf.keras.layers.Dense(n_classes, activation='softmax', kernel_regularizer=tf.keras.regularizers.l2())
 
-    def call(self, inputs):
+    def call(self, inputs, feature=False):
         x = self.c1(inputs)
         x = self.b1(x)
         x = self.a1(x)
         x = self.blocks(x)
         x = self.p1(x)
+        if feature:
+            return x
         y = self.f1(x)
         return y
