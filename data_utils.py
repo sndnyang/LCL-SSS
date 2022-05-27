@@ -23,7 +23,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None):
         shape = (-1, 3, k)
     x = data  # [:, 300:300 + k]  # [220??, 4096]  4096=64*64
     if select is not None:
-        x = data[:]
+        x = data[:, select[0]:select[1]]
     # 0: 爆炸 blast
     # 1: 地震 earthquake
     # 5: noise 噪声 -> 2
