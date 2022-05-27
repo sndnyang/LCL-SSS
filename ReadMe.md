@@ -74,12 +74,20 @@ total time(feature init + 30 epochs training + evaluation) takes 62 seconds,  0:
 python minirocket_un.py
 ```
 
-Test accuracy 0.7277323998444185
+Valid accuracy 0.7263710618436406
+test accuracy 0.7276164549304295
 
-total time(feature init + KMeans training + evaluate cluster accuracy) takes 95 seconds,  0:01:35.068857
+total time(feature init + KMeans training + evaluate cluster accuracy) takes 100 seconds,  0:01:40.92
 
 Much slower, because sklearn KMeans uses multi-cores CPUs. So please use servers, instead of your own PC/laptop 不要用自己的电脑，容易卡死
 
+
+## MiniRocket + Gaussian Mixture
+
+Valid accuracy 0.7253986775573706
+Test accuracy 0.6681790683605565
+
+total time(feature init + GM training + evaluate cluster accuracy) takes 341 seconds,  0:05:41.382244
 
 # Observations
 
