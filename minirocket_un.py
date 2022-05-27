@@ -40,13 +40,13 @@ if __name__ == '__main__':
     print(y_pred[:10])
 
     from utils import cluster_acc
+    print('Valid accuracy')
     train_valid_acc = cluster_acc(y, y_pred)
-    print('Valid accuracy', train_valid_acc)
 
     X_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True).reshape(x_test.shape[0], -1)
     y_pred = model.predict(X_feat)
+    print('test accuracy')
     train_valid_acc = cluster_acc(y_test, y_pred)
-    print('test accuracy', train_valid_acc)
     end = time.time()
     print("Datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
     print("total time(feature init + KMeans training + evaluate cluster accuracy) takes %d seconds, " % (end - start), str(datetime.timedelta(seconds=end-start)))

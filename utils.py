@@ -10,7 +10,13 @@ def cluster_acc(y_true, y_pred):
     for i in range(y_pred.size):
         w[y_pred[i], y_true[i]] += 1
 
-    # ind = sklearn.utils.linear_assignment_.linear_assignment(w.max() - w)
-    # row_ind, col_ind = linear_assignment(w.max() - w)
     row_ind, col_ind = hungarian(w.max() - w)
+    print(row_ind, col_ind)
+    print(w)
+    from sklearn.metrics import precision_recall_fscore_support
+    pred = np.copy(y_pred)
+    for i in range(len(row_ind)):
+        idx = np.where(y_pred == row_ind[i])
+        pred[idx] = col_ind[i]
+    print('precision recall  F1 score in micro:', precision_recall_fscore_support(y_true, pred, average='micro'))
     return sum([w[i, j] for i, j in zip(row_ind, col_ind)]) * 1.0 / y_pred.size
