@@ -4,7 +4,7 @@ Created on 2022.05.22
 
 @author: Xiulong Yang
 """
-
+import time
 import datetime
 import os
 import sys
@@ -42,22 +42,26 @@ if __name__ == '__main__':
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                   metrics=['sparse_categorical_accuracy'])
 
-    checkpoint_save_path = "./checkpoint/Baseline.ckpt"
+    checkpoint_save_path = "./checkpoint/resnet_baseline.ckpt"
     if not training and os.path.exists(checkpoint_save_path + '.index'):
         print('-------------load the model-----------------')
         model.load_weights(checkpoint_save_path)
 
     else:
-
+        start = time.time()
+        epoch = 30
         cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,
                                                          save_weights_only=True,
                                                          save_best_only=True)
 
-        history = model.fit(x_train, y_train, batch_size=32, epochs=20, validation_data=(x_valid, y_valid), validation_freq=1,
+        history = model.fit(x_train, y_train, batch_size=32, epochs=epoch, validation_data=(x_valid, y_valid), validation_freq=1,
                             callbacks=[cp_callback])
 
+        end = time.time()
         model.summary()
 
+        print("datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
+        print("%d epoch takes %d seconds, " % (epoch, end - start), str(datetime.timedelta(seconds=end-start)))
         current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         train_log_dir = 'logs/gradient_/' + current_time + '/train'
         test_log_dir = 'logs/gradient_/' + current_time + '/test'
@@ -81,7 +85,7 @@ if __name__ == '__main__':
         plt.title('Training and Validation Loss')
         plt.legend()
         # plt.show()
-        plt.savefig('loss_acc.png')
+        plt.savefig('resnet_loss_acc.png')
         plt.close()
 
     result = model.predict(x_test)

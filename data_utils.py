@@ -47,7 +47,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None):
         y[y == 5] = 2
 
     norm_x = normalization(x).reshape(shape).astype('float32')
-    sss = ShuffleSplit(n_splits=1, test_size=0.1, random_state=seed)
+    sss = ShuffleSplit(n_splits=1, test_size=0.3, random_state=seed)
     sss.get_n_splits(norm_x, y)
     splits_test = next(sss.split(norm_x, y))
 
