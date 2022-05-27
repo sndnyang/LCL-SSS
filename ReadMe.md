@@ -40,6 +40,8 @@ python main_all.py vgg
 
 precision recall  F1 score in micro: (0.9742891712038717, 0.9742891712038717, 0.9742891712038717
 
+30 epoch takes 228 seconds,  0:03:48.908452
+
 ## inception
 
 ```
@@ -47,6 +49,8 @@ python main_all.py inception
 ```
 
 precision recall  F1 score in micro: (0.9686932849364791, 0.9686932849364791, 0.9686932849364791
+
+30 epoch takes 155 seconds,  0:02:35.260036 by Titan RTX GPU
 
 ## AlexNet 和 LeNet
 
