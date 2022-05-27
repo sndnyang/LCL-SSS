@@ -13,14 +13,15 @@ pip install -r requirements.txt
 
 # 2D shape data
 
-6000 -> 3x50x40
+选项 arg  --shape  0: 6000,  1: 2000, 2: 1000, 3: 500
 
+6000 -> 3x50x40
 
 
 ## resnet
 
 ```
-python resnet_test.py   or python main_all.py resnet
+python resnet_test.py   or python main_all.py --model --model resnet --shape 0
 ```
 
 - precision recall  F1 score in micro: (0.9774652147610405, 0.9774652147610405, 0.9774652147610405, None)
@@ -29,17 +30,17 @@ python resnet_test.py   or python main_all.py resnet
 
 30 epochs takes 210.65927863121033 seconds 0:03:30.659279  by GPU
 
-Note: specify 指定 GPU id  CUDA_VISIBLE_DEVICES=4   4 is the GPU id you want to use
+Note: specify 指定 GPU id  CUDA_VISIBLE_DEVICES=4   4 is the GPU id you want to use or --gpu-id 4
 
 Note: about the micro and macro, weighted modes: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html
 
 ```
-CUDA_VISIBLE_DEVICES=0   python resnet_test.py
+python main_all.py --gpu-id 0
 ```
 ## vgg
 
 ```
-python main_all.py vgg
+python main_all.py --model vg  --shape 0
 ```
 
 - precision recall  F1 score in micro: (0.9807924984875983, 0.9807924984875983, 0.9807924984875983, None)
@@ -51,7 +52,7 @@ python main_all.py vgg
 ## inception
 
 ```
-python main_all.py inception   
+python main_all.py --model inception  --shape 0
 ```
 
 - precision recall  F1 score in micro: (0.9640048396854205, 0.9640048396854205, 0.9640048396854205, None)
@@ -63,7 +64,7 @@ python main_all.py inception
 # MiniRocket
 
 ```
-python minirocket_pytorch.py
+python minirocket_pytorch.py --shape 0
 ```
 
 - precision recall  F1 score in micro: (0.9765577737447066, 0.9765577737447066, 0.9765577737447066, None)
@@ -171,6 +172,6 @@ Please refer to ```minirocket_tsne.ipynb```
 
 ## Normalization 
 
-Normalization (in data_util.py) is crucial for resnet_test.py/main_all.py (98% -> 50%).
+Normalization (in data_util.py) is crucial for resnet_test.py/main_all.py --model (98% -> 50%).
 
 But MiniRocket works well without normalization(supervised: 97.8% -> 97.0%,  unsupervised: 72.7% -> 68.7%)

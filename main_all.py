@@ -117,7 +117,7 @@ if __name__ == '__main__':
         plt.title('Training and Validation Loss')
         plt.legend()
         # plt.show()
-        plt.savefig('%s_loss_acc.png' % model_name)
+        plt.savefig('%s_%d_loss_acc.png' % (model_name, shape))
         plt.close()
 
     result = model.predict(x_test)
