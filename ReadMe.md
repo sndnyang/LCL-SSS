@@ -165,6 +165,10 @@ python gmm.py
 
 # Observations
 
+## Visualization 
+
+Please refer to ```minirocket_tsne.ipynb```
+
 ## Normalization 
 
 Normalization (in data_util.py) is crucial for resnet_test.py/main_all.py (98% -> 50%).

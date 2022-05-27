@@ -10,7 +10,7 @@ from tsai.models.utils import *
 from scipy.io import loadmat
 from data_utils import get_data
 from matplotlib import pyplot as plt
-from utils import cluster_acc, plotter
+from utils import cluster_acc
 
 
 if __name__ == '__main__':
@@ -49,8 +49,6 @@ if __name__ == '__main__':
     end = time.time()
     print("Datashape, train, valid, test: ", x_train.shape, x_valid.shape, x_test.shape)
     print("total time(feature init + KMeans training + evaluate cluster accuracy) takes %d seconds, " % (end - start), str(datetime.timedelta(seconds=end-start)))
-
-
 
     PATH = Path("./models/MR_feature.pt")
     PATH.parent.mkdir(parents=True, exist_ok=True)
