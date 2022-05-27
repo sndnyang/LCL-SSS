@@ -99,6 +99,7 @@ if __name__ == '__main__':
     from sklearn.metrics import precision_recall_fscore_support
     print('precision recall  F1 score in micro:', precision_recall_fscore_support(y_test, pred, average='micro'))
     print('precision recall  F1 score in macro:', precision_recall_fscore_support(y_test, pred, average='macro'))
+    print('precision recall  F1 score in weighted:', precision_recall_fscore_support(y_test, pred, average='weighted'))
 
     from sklearn.metrics import confusion_matrix,  ConfusionMatrixDisplay
     cm = confusion_matrix(y_test, pred)

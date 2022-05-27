@@ -19,4 +19,6 @@ def cluster_acc(y_true, y_pred):
         idx = np.where(y_pred == row_ind[i])
         pred[idx] = col_ind[i]
     print('precision recall  F1 score in micro:', precision_recall_fscore_support(y_true, pred, average='micro'))
+    print('precision recall  F1 score in macro:', precision_recall_fscore_support(y_true, pred, average='macro'))
+    print('precision recall  F1 score in weighted:', precision_recall_fscore_support(y_true, pred, average='weighted'))
     return sum([w[i, j] for i, j in zip(row_ind, col_ind)]) * 1.0 / y_pred.size
