@@ -15,8 +15,7 @@ class AlexNet8(Model):
         self.a2 = Activation('relu')
         self.p2 = MaxPool2D(pool_size=(3, 3), strides=2)
 
-        self.c3 = Conv2D(filters=256, kernel_size=(3, 3), padding='same',
-                         activation='relu')
+        self.c3 = Conv2D(filters=256, kernel_size=(3, 3), padding='same', activation='relu')
         self.p3 = MaxPool2D(pool_size=(3, 3), strides=2)
 
         self.flatten = Flatten()

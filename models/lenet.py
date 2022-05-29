@@ -15,7 +15,7 @@ class LeNet5(Model):
 
         self.flatten = Flatten()
         self.f1 = Dense(128, activation='relu')
-        self.f3 = Dense(num_classes, activation='softmax')
+        self.f2 = Dense(num_classes, activation='softmax')
 
     def call(self, x):
         x = self.c1(x)
@@ -26,6 +26,5 @@ class LeNet5(Model):
 
         x = self.flatten(x)
         x = self.f1(x)
-        x = self.f2(x)
-        y = self.f3(x)
+        y = self.f2(x)
         return y

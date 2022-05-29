@@ -24,8 +24,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='resnet', type=str, choices=['resnet', 'vgg', 'inception'], help='resnet, vgg, inception')
-    parser.add_argument('--shape', default=0, type=int, choices=[0, 1, 2, 3], help='series option, 0: 6000=3x2000, 1: 0:2000, 2: 300:1300, 3: 500:1000')
+    parser.add_argument('--model', default='resnet', type=str, choices=['resnet', 'vgg', 'inception', 'alexnet', 'lenet'], help='resnet, vgg, inception, alexnet, lenet')
+    parser.add_argument('--shape', default=0, type=int, choices=[0, 1, 2, 3, 4], help='series option, 0: 6000=3x2000, 1: 0:2000, 2: 300:1300, 3: 500:1000')
     parser.add_argument('--gpu-id', type=str, help='', default='1')
     args = parser.parse_args()
 
@@ -40,8 +40,8 @@ if __name__ == '__main__':
     model_name = args.model
     logger.add('%s_shape_%d.log' % (model_name, shape))
 
-    select_maps = {0: None, 1: [0, 2000], 2: [300, 1300], 3: [500, 1000]}
-    shape_maps = {0: (-1, 3, 50, 40), 1: (-1, 1, 50, 40), 2: [-1, 1, 40, 25], 3: (-1, 1, 25, 20)}
+    select_maps = {0: None, 1: [0, 2000], 2: [300, 1300], 3: [500, 1000], 4: [100, 1700]}
+    shape_maps = {0: (-1, 3, 50, 40), 1: (-1, 1, 50, 40), 2: [-1, 1, 40, 25], 3: (-1, 1, 25, 20), 4: [-1, 40, 40, 1]}
     print = logger.info
     print('Model uses %s, data select %d, namely %s->%s' % (model_name, shape, str(select_maps[shape]), str(shape_maps[shape])))
 
@@ -64,18 +64,25 @@ if __name__ == '__main__':
     elif model_name == 'vgg':
         # 成功
         model = VGG16(num_classes=3)
-    # elif model_name == 'alexnet':
-    #     # 不能用于任意长宽的数据
-    #     model = AlexNet8(num_classes=3)
-    # elif model_name == 'lenet':
-    #     # 不能用于任意长宽的数据
-    #     model = LeNet5(num_classes=3)
+    elif model_name == 'alexnet':
+        # 不能用于任意长宽的数据
+        model = AlexNet8(num_classes=3)
+    elif model_name == 'lenet':
+        # 不能用于任意长宽的数据
+        model = LeNet5(num_classes=3)
     else:
         model = ResNet18([2, 2, 2, 2], n_classes=3)
 
-    model.compile(optimizer='adam',
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
-                  metrics=['sparse_categorical_accuracy'])
+    if model_name in ['alexnet']:
+        model.compile(optimizer='sgd',
+                      lr=0.01,
+                      loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                      metrics=['sparse_categorical_accuracy'])
+    else:
+        model.compile(optimizer='adam',
+                      lr=1e-4,
+                      loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                      metrics=['sparse_categorical_accuracy'])
 
     checkpoint_save_path = "./checkpoint/%s_%d_baseline.ckpt" % (model_name, shape)
     if not training and os.path.exists(checkpoint_save_path + '.index'):
