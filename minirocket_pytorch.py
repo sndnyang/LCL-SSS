@@ -12,6 +12,7 @@ from loguru import logger
 from scipy.io import loadmat
 from data_utils import get_data
 from matplotlib import pyplot as plt
+torch.set_num_threads(1)
 
 
 if __name__ == '__main__':
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 
     if training is True:
         start = time.time()
-        mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2]).to(default_device())
+        mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2], num_features=10000).to(default_device())
         mrf.fit(x_train)
 
         X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True)
