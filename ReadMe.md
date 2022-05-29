@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 # 2D shape data
 
-选项 arg  --shape  0: 6000,  1: 2000, 2: 1000, 3: 500
+选项 arg  --shape  0: 6000,  1: 2000, 2: 1000, 3: 500, 4:1600
 
 6000 -> 3x50x40
 
