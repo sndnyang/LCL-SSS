@@ -13,3 +13,5 @@ sktime==0.11.4
 # tensorflow-gpu==2.2.0
 tensorflow-gpu==1.15.0
 torch==1.10.1
+loguru==0.6.0
+tsai==0.3.1
