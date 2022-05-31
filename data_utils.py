@@ -1,10 +1,7 @@
 import torch
 import numpy as np
-from scipy.io import loadmat
-from torch.utils.data import TensorDataset, DataLoader
 from sklearn import preprocessing
-from sklearn.model_selection import train_test_split, ShuffleSplit
-from fastcore.foundation import L
+from sklearn.model_selection import ShuffleSplit
 
 
 def normalization(array):
@@ -64,11 +61,12 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None, siz
     x_train, x_valid = x_train[train_index], x_train[valid_index]
     y_train, y_valid = y_train[train_index], y_train[valid_index]
 
-    splits2 = (L(list(splits[0])), L(list(splits[1])))
+    splits2 = splits
     return x_train, x_valid, x_test, y_train, y_valid, y_test, splits2, splits_test
 
 
 def get_data_loader(data, target, args, shape=None):
+    from torch.utils.data import TensorDataset
 
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits2, splits_test = get_data(data, target, dataset=args.dataset, seed=args.seed, select=None, shape=shape)
     # set contains training and validation
