@@ -23,3 +23,17 @@ def cluster_acc(y_true, y_pred):
     logger.info('precision recall  F1 score in macro: %s' % str(precision_recall_fscore_support(y_true, pred, average='macro')))
     logger.info('precision recall  F1 score in weighted: %s' % str(precision_recall_fscore_support(y_true, pred, average='weighted')))
     return sum([w[i, j] for i, j in zip(row_ind, col_ind)]) * 1.0 / y_pred.size
+
+
+def mine_nearest_neighbors(features, top_k):
+    # mine the top k nearest neighbors for every sample
+    import faiss
+    # features = features.cpu().numpy()
+    n, dim = features.shape[0], features.shape[1]
+    index = faiss.IndexFlatL2(dim)
+    index = faiss.index_cpu_to_all_gpus(index)
+    index.add(features)
+    distances, indices = index.search(features, top_k + 1)  # Sample itself is included
+
+    # evaluate
+    return indices

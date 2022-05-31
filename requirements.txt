@@ -15,3 +15,5 @@ tensorflow-gpu==1.15.0
 torch==1.10.1
 loguru==0.6.0
 tsai==0.3.1
+
+faiss-gpu==1.6.0
