@@ -1,7 +1,7 @@
-import torch
 import numpy as np
 from sklearn import preprocessing
 from sklearn.model_selection import ShuffleSplit
+from fastcore.foundation import L
 
 
 def normalization(array):
@@ -66,6 +66,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None, siz
 
 
 def get_data_loader(data, target, args, shape=None):
+    import torch
     from torch.utils.data import TensorDataset
 
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits2, splits_test = get_data(data, target, dataset=args.dataset, seed=args.seed, select=None, shape=shape)

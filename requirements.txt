@@ -1,3 +1,5 @@
+fastai==2.6.3
+fastcore==1.4.3
 ipython==7.33.0
 matplotlib==3.5.2
 notebook==6.4.11
