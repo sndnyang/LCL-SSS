@@ -61,7 +61,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None, siz
     x_train, x_valid = x_train[train_index], x_train[valid_index]
     y_train, y_valid = y_train[train_index], y_train[valid_index]
 
-    splits2 = splits
+    splits2 = (L(list(splits[0])), L(list(splits[1])))
     return x_train, x_valid, x_test, y_train, y_valid, y_test, splits2, splits_test
 
 
