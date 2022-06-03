@@ -124,9 +124,9 @@ total time(feature init + GM training + evaluate cluster accuracy) takes 341 sec
 
 ## MiniRocket + cluster head
 
-2022-06-03 00:09:00.964 | INFO     | __main__:cluster_acc:22 - precision recall  F1 score in micro: (0.8114035087719298, 0.8114035087719298, 0.8114035087719298, None)
-2022-06-03 00:09:00.970 | INFO     | __main__:cluster_acc:23 - precision recall  F1 score in macro: (0.8178379533964444, 0.8394204262915687, 0.8132728614856477, None)
-2022-06-03 00:09:00.975 | INFO     | __main__:cluster_acc:24 - precision recall  F1 score in weighted: (0.8449325470490134, 0.8114035087719298, 0.813164746070741, None)
+- precision recall  F1 score in micro: (0.8114035087719298, 0.8114035087719298, 0.8114035087719298, None)
+- precision recall  F1 score in macro: (0.8178379533964444, 0.8394204262915687, 0.8132728614856477, None)
+- precision recall  F1 score in weighted: (0.8449325470490134, 0.8114035087719298, 0.813164746070741, None)
 
 Best test clustering accuracy 0.8373
 data shape (13883, 1, 6000)(1543, 1, 6000)(6612, 1, 6000)
