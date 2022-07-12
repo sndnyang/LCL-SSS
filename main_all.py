@@ -16,9 +16,12 @@ import tensorflow as tf
 from scipy.io import loadmat
 from matplotlib import pyplot as plt
 from loguru import logger
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 from data_utils import get_data
 from models import *
+from callbacks import KerasF1
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
@@ -95,9 +98,8 @@ if __name__ == '__main__':
         cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,
                                                          save_weights_only=True,
                                                          save_best_only=True)
-
         history = model.fit(x_train, y_train, batch_size=32, epochs=epoch, validation_data=(x_valid, y_valid), validation_freq=1,
-                            callbacks=[cp_callback])
+                            callbacks=[KerasF1(valid_data=(x_test, y_test)), cp_callback])
 
         end = time.time()
         model.summary()
@@ -135,12 +137,10 @@ if __name__ == '__main__':
         pred = pred.numpy()
     print('Test accuracy %.2f' % sklearn.metrics.accuracy_score(y_test, pred))
 
-    from sklearn.metrics import precision_recall_fscore_support
     print('precision recall  F1 score in micro: %s' % str(precision_recall_fscore_support(y_test, pred, average='micro')))
     print('precision recall  F1 score in macro: %s' % str(precision_recall_fscore_support(y_test, pred, average='macro')))
     print('precision recall  F1 score in weighted: %s' % str(precision_recall_fscore_support(y_test, pred, average='weighted')))
 
-    from sklearn.metrics import confusion_matrix,  ConfusionMatrixDisplay
     cm = confusion_matrix(y_test, pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2])
     disp.plot()
