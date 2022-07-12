@@ -16,7 +16,7 @@ def prec_recall_f1(y_true, y_pred):
     logger.info('precision recall  F1 score in weighted: %s' % results)
 
 
-def cluster_acc(y_true, y_pred):
+def cluster_acc(y_true, y_pred, matrix=False):
     y_true = y_true.astype(np.int64)
     assert y_pred.size == y_true.size
     D = max(y_pred.max(), y_true.max()) + 1
@@ -25,14 +25,15 @@ def cluster_acc(y_true, y_pred):
         w[y_pred[i], y_true[i]] += 1
 
     row_ind, col_ind = hungarian(w.max() - w)
-    print(row_ind, col_ind)
-    print(w)
     from sklearn.metrics import precision_recall_fscore_support
     pred = np.copy(y_pred)
     for i in range(len(row_ind)):
         idx = np.where(y_pred == row_ind[i])
         pred[idx] = col_ind[i]
     prec_recall_f1(y_true, pred)
+    if matrix:
+        print(row_ind, col_ind)
+        print(w)
     return sum([w[i, j] for i, j in zip(row_ind, col_ind)]) * 1.0 / y_pred.size, pred
 
 

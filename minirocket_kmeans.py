@@ -53,15 +53,32 @@ if __name__ == '__main__':
     X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True).reshape(X.shape[0], -1)
     print(X_feat.shape)
 
-    model = KMeans(n_clusters=3)
-    y_pred = model.fit_predict(X_feat)
-    print(y_pred[:10])
+    # model = KMeans(n_clusters=3)
+    # y_pred = model.fit_predict(X_feat)
+    # print(y_pred[:10])
+    # print('Valid accuracy')
+    # train_valid_acc = cluster_acc(y, y_pred)
 
-    print('Valid accuracy')
-    train_valid_acc = cluster_acc(y, y_pred)
+    X_test_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True).reshape(x_test.shape[0], -1)
 
-    X_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True).reshape(x_test.shape[0], -1)
-    y_pred = model.predict(X_feat)
+    iterations = 50
+    centroids = None
+
+    for i in range(iterations):
+        kmeans = KMeans(
+            max_iter=1,
+            n_init=1,
+            init=(centroids if centroids is not None else 'k-means++'),
+            n_clusters=3,
+            random_state=1)
+        kmeans.fit(X_feat)
+        centroids = kmeans.cluster_centers_
+        y_pred = kmeans.predict(X_test_feat)
+        print('Iteration %d' % i)
+        train_valid_acc, y_pred = cluster_acc(y_test, y_pred)
+
+
+    y_pred = kmeans.predict(X_test_feat)
     print('test accuracy')
     train_valid_acc, y_pred = cluster_acc(y_test, y_pred)
     end = time.time()
