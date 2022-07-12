@@ -134,7 +134,7 @@ if __name__ == '__main__':
     all_data = train_data['images']
     all_target = train_data['labels']
     shape = args.shape
-    model_name = 'MiniRocket_KMeans'
+    model_name = 'MiniRocket_ClusterHead'
     logger.add('%s_shape_%d.log' % (model_name, shape))
 
     select_maps = {0: None, 1: [0, 2000], 2: [300, 1300], 3: [500, 1000]}
@@ -189,7 +189,8 @@ if __name__ == '__main__':
     for epoch in range(50):
         train(train_loader, model, optimizer)
         preds, y_t = test(test_loader, model)
-        c_acc = cluster_acc(np.array(y_t), np.array(preds))
+        print('Epoch %d' % epoch)
+        c_acc, _ = cluster_acc(np.array(y_t), np.array(preds))
         if c_acc > best_acc:
             best_acc = c_acc
         sched.step()

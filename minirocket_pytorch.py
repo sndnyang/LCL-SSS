@@ -7,9 +7,13 @@ import sklearn
 
 from tsai.models.MINIROCKET_Pytorch import *
 from tsai.models.utils import *
+from callbacks.FastAIF1 import FastAIF1
 from loguru import logger
 
 from scipy.io import loadmat
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
 from data_utils import get_data
 from matplotlib import pyplot as plt
 torch.set_num_threads(1)
@@ -61,19 +65,20 @@ if __name__ == '__main__':
         dls = get_ts_dls(X_feat, y, splits=splits, tfms=tfms, batch_tfms=batch_tfms)
 
         model = build_ts_model(MiniRocketHead, dls=dls)
-        learn = Learner(dls, model, metrics=accuracy)
+        learn = Learner(dls, model, metrics=[accuracy, Precision(average='weighted'), Recall(average='weighted'), F1Score(average='weighted')])
+        # learn = Learner(dls, model, metrics=[accuracy, F1Score('micro')])
         epoch = 30
         timer.start()
         learn.fit_one_cycle(epoch, 3e-4)    # epoch 30 (20 ~ 100),  learning rate 3e-4
         timer.stop()
 
         end = time.time()
-        new_feat = get_minirocket_features(X[splits[1]], mrf, chunksize=1024, to_np=True)
-        probas, _, pred = learn.get_X_preds(new_feat)
+        X_feat = get_minirocket_features(X[splits[1]], mrf, chunksize=512, to_np=True)
+        probas, _, pred = learn.get_X_preds(X_feat)
         print('Valid Accuracy %.4f' % sklearn.metrics.accuracy_score(y[splits[1]], pred.astype(int)))
 
-        new_feat = get_minirocket_features(x_test, mrf, chunksize=1024, to_np=True)
-        probas, _, pred = learn.get_X_preds(new_feat)
+        X_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True)
+        probas, _, pred = learn.get_X_preds(X_feat)
         pred = pred.astype(int)
         print('Test accuracy %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
@@ -91,17 +96,15 @@ if __name__ == '__main__':
         mrf.load_state_dict(torch.load(PATH))
         PATH = Path('./models/MR_learner.pkl')
         learn = load_learner(PATH, cpu=False)
-        new_feat = get_minirocket_features(x_test, mrf, chunksize=1024, to_np=True)
-        probas, _, pred = learn.get_X_preds(new_feat)
+        X_feat = get_minirocket_features(x_test, mrf, chunksize=1024, to_np=True)
+        probas, _, pred = learn.get_X_preds(X_feat)
         pred = pred.astype(int)
         print('Test accuracy %.2f' % sklearn.metrics.accuracy_score(y_test, pred))
 
-    from sklearn.metrics import precision_recall_fscore_support
     print('precision recall  F1 score in micro: %s' % str(precision_recall_fscore_support(y_test, pred, average='micro')))
     print('precision recall  F1 score in macro: %s' % str(precision_recall_fscore_support(y_test, pred, average='macro')))
     print('precision recall  F1 score in weighted: %s' % str(precision_recall_fscore_support(y_test, pred, average='weighted')))
 
-    from sklearn.metrics import confusion_matrix,  ConfusionMatrixDisplay
     cm = confusion_matrix(y_test, pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1, 2])
     disp.plot()
