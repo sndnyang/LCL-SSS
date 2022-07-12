@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ## resnet
 
 ```
-python resnet_test.py   or python main_all.py --model --model resnet --shape 0
+python resnet_test.py   or python main_all.py --model resnet --shape 0
 ```
 
 - precision recall  F1 score in micro: (0.9774652147610405, 0.9774652147610405, 0.9774652147610405, None)
@@ -40,7 +40,7 @@ python main_all.py --gpu-id 0
 ## vgg
 
 ```
-python main_all.py --model vg  --shape 0
+python main_all.py --model vgg  --shape 0
 ```
 
 - precision recall  F1 score in micro: (0.9807924984875983, 0.9807924984875983, 0.9807924984875983, None)
@@ -123,6 +123,10 @@ Test (unseen data)
 total time(feature init + GM training + evaluate cluster accuracy) takes 341 seconds,  0:05:41.382244
 
 ## MiniRocket + cluster head
+
+```
+python minirocket_cluster_head.py
+```
 
 - precision recall  F1 score in micro: (0.8114035087719298, 0.8114035087719298, 0.8114035087719298, None)
 - precision recall  F1 score in macro: (0.8178379533964444, 0.8394204262915687, 0.8132728614856477, None)
