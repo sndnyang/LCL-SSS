@@ -1,6 +1,19 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment as hungarian
+from sklearn.metrics import precision_recall_fscore_support
 from loguru import logger
+
+
+def prec_recall_f1(y_true, y_pred):
+    a, b, c, d = precision_recall_fscore_support(y_true, y_pred, average='micro')
+    results = ' %.4f | %.4f | %.4f' % (a, b, c)
+    logger.info('precision recall  F1 score in    micro: %s' % results)
+    a, b, c, d = precision_recall_fscore_support(y_true, y_pred, average='macro')
+    results = ' %.4f | %.4f | %.4f' % (a, b, c)
+    logger.info('precision recall  F1 score in    macro: %s' % results)
+    a, b, c, d = precision_recall_fscore_support(y_true, y_pred, average='weighted')
+    results = ' %.4f | %.4f | %.4f' % (a, b, c)
+    logger.info('precision recall  F1 score in weighted: %s' % results)
 
 
 def cluster_acc(y_true, y_pred):
@@ -19,10 +32,8 @@ def cluster_acc(y_true, y_pred):
     for i in range(len(row_ind)):
         idx = np.where(y_pred == row_ind[i])
         pred[idx] = col_ind[i]
-    logger.info('precision recall  F1 score in micro: %s' % str(precision_recall_fscore_support(y_true, pred, average='micro')))
-    logger.info('precision recall  F1 score in macro: %s' % str(precision_recall_fscore_support(y_true, pred, average='macro')))
-    logger.info('precision recall  F1 score in weighted: %s' % str(precision_recall_fscore_support(y_true, pred, average='weighted')))
-    return sum([w[i, j] for i, j in zip(row_ind, col_ind)]) * 1.0 / y_pred.size
+    prec_recall_f1(y_true, pred)
+    return sum([w[i, j] for i, j in zip(row_ind, col_ind)]) * 1.0 / y_pred.size, pred
 
 
 def mine_nearest_neighbors(features, top_k):

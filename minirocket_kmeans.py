@@ -63,7 +63,7 @@ if __name__ == '__main__':
     X_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True).reshape(x_test.shape[0], -1)
     y_pred = model.predict(X_feat)
     print('test accuracy')
-    train_valid_acc = cluster_acc(y_test, y_pred)
+    train_valid_acc, y_pred = cluster_acc(y_test, y_pred)
     end = time.time()
 
     print('data shape %s' % str(x_train.shape) + str(x_valid.shape) + str(x_test.shape))

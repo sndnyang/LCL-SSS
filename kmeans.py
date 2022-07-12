@@ -43,6 +43,6 @@ if __name__ == '__main__':
     X_feat = x_test.reshape(x_test.shape[0], -1)
     y_pred = model.predict(X_feat)
     print('test accuracy')
-    train_valid_acc = cluster_acc(y_test, y_pred)
+    train_valid_acc, y_pred = cluster_acc(y_test, y_pred)
     end = time.time()
     print("total time (KMeans training + evaluate cluster accuracy) takes %d seconds, %s" % (end - start, str(datetime.timedelta(seconds=end-start))))
