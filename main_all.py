@@ -5,7 +5,6 @@ Created on 2022.05.22
 @author: Xiulong Yang
 """
 import os
-import sys
 import time
 import datetime
 import argparse
@@ -21,7 +20,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 from data_utils import get_data
 from models import *
-from callbacks import KerasF1
+from callbacks.KerasF1 import KerasF1
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
