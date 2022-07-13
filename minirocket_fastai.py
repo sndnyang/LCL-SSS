@@ -46,7 +46,7 @@ if __name__ == '__main__':
     all_data = train_data['images']
     all_target = train_data['labels']
     shape = args.shape
-    model_name = 'MiniRocket_CLS'
+    model_name = 'MiniRocket_TSAI'
     logger.add('%s_shape_%d.log' % (model_name, shape))
 
     select_maps = {0: None, 1: [0, 2000], 2: [300, 1300], 3: [500, 1000]}
@@ -75,8 +75,8 @@ if __name__ == '__main__':
 
         # As above, use tsai to bring X_feat into fastai, and train.
         tfms = [None, TSClassification()]
-        batch_tfms = TSStandardize(by_sample=True)
-        dls = get_ts_dls(X_feat, y, splits=splits, tfms=tfms, batch_tfms=batch_tfms)
+        # batch_tfms = TSStandardize(by_sample=True)
+        dls = get_ts_dls(X_feat, y, splits=splits, tfms=tfms, batch_tfms=None)
 
         model = build_ts_model(MiniRocketHead, dls=dls)
         learn = Learner(dls, model, metrics=[accuracy, Precision(average='weighted'), Recall(average='weighted'), F1Score(average='weighted')])
