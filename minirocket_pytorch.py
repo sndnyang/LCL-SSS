@@ -12,13 +12,68 @@ from loguru import logger
 
 import numpy as np
 import torch
+import torch.optim as optim
+from torch.utils.data import TensorDataset, DataLoader
 from scipy.io import loadmat
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import torch
+from torch import nn
 
+from utils import prec_recall_f1
 from data_utils import get_data
 from matplotlib import pyplot as plt
 torch.set_num_threads(1)
+
+
+class Cls(nn.Module):
+    """
+    based on Caffe LeNet (https://github.com/BVLC/caffe/blob/master/examples/mnist/lenet.prototxt)
+    """
+
+    def __init__(self, feat=8888):
+        super(Cls, self).__init__()
+        self.dense = nn.Linear(feat, 3)
+
+    def forward(self, x):
+        x = self.dense(x)
+        return x
+
+
+def train(train_loader, model, optimizer):
+    model.train()
+    criterion = nn.CrossEntropyLoss()
+    t_loss = 0
+    for input_x, label_y in train_loader:
+        input_x = input_x.cuda()
+        label_y = label_y.cuda()
+        logits = model(input_x)
+        loss = criterion(logits, label_y)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        t_loss = loss.item()
+    print('loss %.4f data range (%.4f, %.4f)' % (t_loss, input_x.min().item(), input_x.max().item()))
+
+
+def test(test_loader, model):
+    model.eval()
+    preds = []
+    ys = []
+    acc, n = 0, 0
+    for input_x, label_y in test_loader:
+        with torch.no_grad():
+            input_x = input_x.cuda()
+            logits = model(input_x)
+            bs_preds = logits.argmax(1).detach().cpu()
+            acc += (bs_preds == label_y).sum()
+            n += input_x.shape[0]
+            preds.extend(bs_preds.numpy())
+            ys.extend(label_y.numpy())
+
+    prec_recall_f1(ys, preds)
+    acc = acc / n
+    return acc, preds
 
 
 if __name__ == '__main__':
@@ -69,39 +124,44 @@ if __name__ == '__main__':
         mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2], num_features=10000).to(device)
         mrf.fit(x_train)
 
-        X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True)
+        X_feat = get_minirocket_features(X[splits[0]], mrf, chunksize=512, to_np=True)
+        X_valid_feat = get_minirocket_features(X[splits[1]], mrf, chunksize=512, to_np=True)
+        X_test_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True)
+
+        feats = X_feat.shape[1]
+        batch_size = 32
+        train_set = TensorDataset(torch.Tensor(X_feat.reshape(-1, feats)), torch.LongTensor(y[splits[0]]))  # create your dataset
+        valid_set = TensorDataset(torch.Tensor(X_valid_feat.reshape(-1, feats)), torch.LongTensor(y[splits[1]]))
+        test_set = TensorDataset(torch.Tensor(X_test_feat.reshape(-1, feats)), torch.LongTensor(y_test))
+
+        train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0)
+        valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=0)
+        test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=0)
         print('Get the features')
 
         # As above, use tsai to bring X_feat into fastai, and train.
-        tfms = [None, TSClassification()]
-        batch_tfms = TSStandardize(by_sample=True)
-        dls = get_ts_dls(X_feat, y, splits=splits, tfms=tfms, batch_tfms=batch_tfms)
-
-        model = build_ts_model(MiniRocketHead, dls=dls)
-        learn = Learner(dls, model, metrics=[accuracy, Precision(average='weighted'), Recall(average='weighted'), F1Score(average='weighted')])
         epoch = 30
-        timer.start()
-        learn.fit_one_cycle(epoch, 3e-4)    # epoch 30 (20 ~ 100),  learning rate 3e-4
-        timer.stop()
+
+        model = Cls(X_feat.shape[1])
+        model.cuda()
+
+        optimizer = optim.Adam(params=model.parameters(), lr=1e-4)
+        sched = optim.lr_scheduler.CosineAnnealingLR(optimizer, epoch)
+        best_acc = 0
+        for epoch in range(epoch):
+            train(train_loader, model, optimizer)
+            print('Epoch %d' % epoch)
+            c_acc, preds = test(test_loader, model)
+            if c_acc > best_acc:
+                best_acc = c_acc
+            sched.step()
 
         end = time.time()
-        X_feat = get_minirocket_features(X[splits[1]], mrf, chunksize=512, to_np=True)
-        probas, _, pred = learn.get_X_preds(X_feat)
-        print('Valid Accuracy %.4f' % sklearn.metrics.accuracy_score(y[splits[1]], pred.astype(int)))
-
-        X_feat = get_minirocket_features(x_test, mrf, chunksize=512, to_np=True)
-        probas, _, pred = learn.get_X_preds(X_feat)
-        pred = pred.astype(int)
-        print('Test accuracy %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
-
         print('data shape %s' % str(x_train.shape) + str(x_valid.shape) + str(x_test.shape))
         print("Total time(feature init + %d epochs training) takes %d seconds, %s" % (epoch, end - start, str(datetime.timedelta(seconds=end-start))))
         PATH = Path("./models/MR_feature.pt")
         PATH.parent.mkdir(parents=True, exist_ok=True)
         torch.save(mrf.state_dict(), PATH)
-        PATH = Path('./models/MR_learner.pkl')
-        learn.export(PATH)
-        print('model save path %s' % PATH)
     else:
         mrf = MiniRocketFeatures(X.shape[1], X.shape[2]).to(device)
         PATH = Path("./models/MR_feature.pt")
@@ -113,6 +173,8 @@ if __name__ == '__main__':
         pred = pred.astype(int)
         print('Test accuracy %.2f' % sklearn.metrics.accuracy_score(y_test, pred))
 
+    print("Final")
+    c_acc, pred = test(test_loader, model)
     print('precision recall  F1 score in micro: %s' % str(precision_recall_fscore_support(y_test, pred, average='micro')))
     print('precision recall  F1 score in macro: %s' % str(precision_recall_fscore_support(y_test, pred, average='macro')))
     print('precision recall  F1 score in weighted: %s' % str(precision_recall_fscore_support(y_test, pred, average='weighted')))
