@@ -1,4 +1,5 @@
 import time
+import random
 import datetime
 import argparse
 from tsai.basics import *
@@ -7,9 +8,10 @@ import sklearn
 
 from tsai.models.MINIROCKET_Pytorch import *
 from tsai.models.utils import *
-from callbacks.FastAIF1 import FastAIF1
 from loguru import logger
 
+import numpy as np
+import torch
 from scipy.io import loadmat
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
@@ -23,11 +25,20 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--eval', action="store_true")
     parser.add_argument('--shape', default=0, type=int, choices=[0, 1, 2, 3], help='series option, 0: 6000=3x2000, 1: 0:2000, 2: 300:1300, 3: 500:1000')
+    parser.add_argument('--norm', default=1, type=int, choices=[0, 1], help='normalization or not')
+    parser.add_argument('--seed', type=int, help='', default=1)
     parser.add_argument('--gpu-id', type=str, help='', default='1')
     args = parser.parse_args()
 
     # Use GPU
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_id
+    os.environ['PYTHONHASHSEED'] = '0'
+
+    random.seed(0)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     # 载入数据
     train_data = loadmat('earthb.mat')
@@ -43,21 +54,23 @@ if __name__ == '__main__':
     print('Model uses %s, data select %d, namely %s->%s' % (model_name, shape, str(select_maps[shape]), str(shape_maps[shape])))
 
     # load data
-    data = get_data(all_data, all_target, dataset='eq', seed=1, shape=shape_maps[shape], select=select_maps[shape])
+    data = get_data(all_data, all_target, dataset='eq', seed=1, shape=shape_maps[shape], select=select_maps[shape], norm=args.norm)
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits, splits_test = data
     print('data shape %s' % str(x_train.shape) + str(x_valid.shape) + str(x_test.shape))
     # set contains training and validation
     X = np.concatenate([x_train, x_valid])
     y = np.concatenate([y_train, y_valid])
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     training = not args.eval
 
     if training is True:
         start = time.time()
-        mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2], num_features=10000).to(default_device())
+        mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2], num_features=10000).to(device)
         mrf.fit(x_train)
 
         X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True)
+        print('Get the features')
 
         # As above, use tsai to bring X_feat into fastai, and train.
         tfms = [None, TSClassification()]
@@ -66,7 +79,6 @@ if __name__ == '__main__':
 
         model = build_ts_model(MiniRocketHead, dls=dls)
         learn = Learner(dls, model, metrics=[accuracy, Precision(average='weighted'), Recall(average='weighted'), F1Score(average='weighted')])
-        # learn = Learner(dls, model, metrics=[accuracy, F1Score('micro')])
         epoch = 30
         timer.start()
         learn.fit_one_cycle(epoch, 3e-4)    # epoch 30 (20 ~ 100),  learning rate 3e-4
@@ -91,7 +103,7 @@ if __name__ == '__main__':
         learn.export(PATH)
         print('model save path %s' % PATH)
     else:
-        mrf = MiniRocketFeatures(X.shape[1], X.shape[2]).to(default_device())
+        mrf = MiniRocketFeatures(X.shape[1], X.shape[2]).to(device)
         PATH = Path("./models/MR_feature.pt")
         mrf.load_state_dict(torch.load(PATH))
         PATH = Path('./models/MR_learner.pkl')

@@ -28,6 +28,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='resnet', type=str, choices=['resnet', 'vgg', 'inception', 'alexnet', 'lenet'], help='resnet, vgg, inception, alexnet, lenet')
     parser.add_argument('--shape', default=0, type=int, choices=[0, 1, 2, 3, 4], help='series option, 0: 6000=3x2000, 1: 0:2000, 2: 300:1300, 3: 500:1000')
+    parser.add_argument('--norm', default=1, type=int, choices=[0, 1], help='normalization or not')
+    parser.add_argument('--seed', type=int, help='', default=1)
     parser.add_argument('--gpu-id', type=str, help='', default='1')
     args = parser.parse_args()
 
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     print('Model uses %s, data select %d, namely %s->%s' % (model_name, shape, str(select_maps[shape]), str(shape_maps[shape])))
 
     # load data
-    data = get_data(all_data, all_target, dataset='eq', seed=1, shape=shape_maps[shape], select=select_maps[shape])
+    data = get_data(all_data, all_target, dataset='eq', seed=1, shape=shape_maps[shape], select=select_maps[shape], norm=args.norm)
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits, splits_test = data
     print('data shape %s' % str(x_train.shape) + str(x_valid.shape) + str(x_test.shape))
     # set contains training and validation

@@ -2,17 +2,23 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.model_selection import ShuffleSplit
 from fastcore.foundation import L
+from loguru import logger
 
 
-def normalization(array):
-    # max_cols = array.max()
-    # min_cols = array.min()
-    normalizer_data = preprocessing.Normalizer().fit_transform(array)
+def normalization(array, norm=False):
+    if norm:
+        # normalization
+        normalizer_data = preprocessing.Normalizer().fit_transform(array)
+        logger.info('Normalization in range [%.4f, %.4f]' % (normalizer_data.min(), normalizer_data.max()))
+    else:
+        # no normalization
+        normalizer_data = array
+        logger.info('Unnormalization in range [%.4f, %.4f]' % (normalizer_data.min(), normalizer_data.max()))
     # return (array - min_cols) / (max_cols - min_cols)
     return normalizer_data
 
 
-def get_data(data, target, dataset='eq', seed=None, select=None, shape=None, size=0.3):
+def get_data(data, target, dataset='eq', seed=None, select=None, shape=None, size=0.3, norm=False):
     if seed is None:
         seed = np.random.randint(100000)
     k = 2000
@@ -43,7 +49,7 @@ def get_data(data, target, dataset='eq', seed=None, select=None, shape=None, siz
         # three classes
         y[y == 5] = 2
 
-    norm_x = normalization(x).reshape(shape).astype('float32')
+    norm_x = normalization(x, norm=norm).reshape(shape).astype('float32')
     sss = ShuffleSplit(n_splits=1, test_size=size, random_state=seed)
     sss.get_n_splits(norm_x, y)
     splits_test = next(sss.split(norm_x, y))
