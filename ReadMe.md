@@ -185,6 +185,11 @@ Please refer to ```minirocket_tsne.ipynb```
 
 ## Normalization 
 
+```
+--norm 1  with data normalization
+--norm 0  without data normalization
+```
+
 Normalization (in data_util.py) is crucial for resnet_test.py/main_all.py --model (98% -> 50%).
 
-But MiniRocket works well without normalization(supervised: 97.8% -> 97.0%,  unsupervised: 72.7% -> 68.7%)
+But MiniRocket works well without normalization(supervised: 97.8% -> 97.0%,  kmeans: 72.7% -> 68.7%, cluster head: 85.1% -> 80.5%)
