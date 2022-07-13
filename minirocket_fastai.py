@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     if training is True:
         start = time.time()
-        mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2], num_features=1000).to(device)
+        mrf = MiniRocketFeatures(x_train.shape[1], x_train.shape[2], num_features=10000).to(device)
         mrf.fit(x_train)
 
         X_feat = get_minirocket_features(X, mrf, chunksize=512, to_np=True)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         learn = Learner(dls, model, metrics=[accuracy, Precision(average='weighted'), Recall(average='weighted'), F1Score(average='weighted')])
         epoch = 30
         timer.start()
-        learn.fit(epoch, 3e-4, cbs=FastAIF1())    # epoch 30 (20 ~ 100),  learning rate 3e-4
+        learn.fit_one_cycle(epoch, 3e-4, cbs=FastAIF1())    # epoch 30 (20 ~ 100),  learning rate 3e-4
         timer.stop()
 
         end = time.time()
