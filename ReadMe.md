@@ -1,12 +1,12 @@
 # EarthQuake Seismic Classification
 
-# 安装
+# installation 安装
 
 pip install -r requirements.txt
 
-# 数据划分
+# data splitting 数据划分
 
-训练:验证:测试  0.63: 0.07:0.3
+train:valid:test 训练:验证:测试  0.63: 0.07:0.3
 
 (13883, 3, 50, 40) (1543, 3, 50, 40) (6612, 3, 50, 40)
 
@@ -15,7 +15,11 @@ pip install -r requirements.txt
 
 选项 arg  --shape  0: 6000,  1: 2000, 2: 1000, 3: 500, 4:1600
 
-6000 -> 3x50x40
+- shape 0: 6000 -> [3, 50, 40]
+- shape 1: 2000 -> [1, 50, 40]
+- shape 2: 1000 -> [1, 40, 25]
+- shape 3:  500 -> [1, 25, 20]
+- shape 4: 1600 -> [1, 40, 40]
 
 
 ## resnet
