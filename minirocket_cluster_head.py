@@ -102,7 +102,7 @@ def test(test_loader, model):
     return preds, y_t
 
 
-def train(train_loader, model, optimizer):
+def train(train_loader, model, optimizer, criterion):
     model.train()
     t_loss = 0
     for x, y in train_loader:
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     sched = optim.lr_scheduler.CosineAnnealingLR(optimizer, 50)
     best_acc = 0
     for epoch in range(50):
-        train(train_loader, model, optimizer)
+        train(train_loader, model, optimizer, criterion)
         preds, y_t = test(test_loader, model)
         print('Epoch %d' % epoch)
         c_acc, _ = cluster_acc(np.array(y_t), np.array(preds))
