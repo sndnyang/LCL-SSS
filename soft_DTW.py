@@ -25,11 +25,11 @@ if __name__ == '__main__':
     all_data = train_data['images']
     all_target = train_data['labels']
 
-    shape = 2
+    shape = 3
     select_maps = {0: None, 1: [0, 2000], 2: [300, 1300], 3: [500, 1000]}
     shape_maps = {0: (-1, 1, 6000), 1: (-1, 1, 2000), 2: [-1, 1, 1000], 3: (-1, 1, 500)}
     # load data
-    data = get_data(all_data, all_target, dataset='eq', seed=1, shape=shape_maps[shape], select=select_maps[shape])
+    data = get_data(all_data, all_target, dataset='eq', seed=1, shape=shape_maps[shape], select=select_maps[shape], size=0.95)
     x_train, x_valid, x_test, y_train, y_valid, y_test, splits, splits_test = data
     # set contains training and validation
     X = np.concatenate([x_train, x_valid])
@@ -75,6 +75,7 @@ if __name__ == '__main__':
                                n_jobs=-1,
                                metric_params={"gamma": .01},
                                verbose=True,
+                               max_iter_barycenter=10,
                                random_state=1)
     y_pred = sdtw_km.fit_predict(X_feat)
 
