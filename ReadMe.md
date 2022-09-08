@@ -1,5 +1,7 @@
 # EarthQuake Seismic Classification
 
+Implementation of paper [Research on Seismic Signal Analysis Based on Machine Learning](https://www.mdpi.com/2076-3417/12/16/8389)
+
 # installation 安装
 
 pip install -r requirements.txt
@@ -197,3 +199,26 @@ Please refer to ```minirocket_tsne.ipynb```
 Normalization (in data_util.py) is crucial for resnet_test.py/main_all.py --model (98% -> 50%).
 
 But MiniRocket works well without normalization(supervised: 97.8% -> 97.0%,  kmeans: 72.7% -> 68.7%, cluster head: 85.1% -> 80.5%)
+
+
+
+# Citation
+
+If you found this work useful and used it on your own research, please concider citing this paper.
+
+```
+
+@Article{xiulongyang20220506,
+    author = {Yin, Xinxin and Liu, Feng and Cai, Run and Yang, Xiulong and Zhang, Xiaoyue and Ning, Meiling and Shen, Siyuan},
+    title = {Research on Seismic Signal Analysis Based on Machine Learning},
+    journal = {Applied Sciences},
+    volume = {12},
+    year = {2022},
+    number = {16},
+    article-NUMBER = {8389},
+    url = {https://www.mdpi.com/2076-3417/12/16/8389},
+    issn = {2076-3417},
+    doi = {10.3390/app12168389}
+}
+```
+
